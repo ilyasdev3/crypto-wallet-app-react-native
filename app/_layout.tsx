@@ -10,7 +10,7 @@ const RootLayout = () => {
       {/* Optionally configure static options outside the route.*/}
       {/* <Stack.Screen name="wallet" options={{}} /> */}
       <Stack.Screen name="(tabs)" options={{}} />
-      <Stack.Screen name="CointDetails" options={{}} />
+      <Stack.Screen name="CoinDetails" options={{}} />
       <Stack.Screen name="NewsFeed" options={{}} />
       <Stack.Screen name="ProfilePhoto" options={{}} />
       <Stack.Screen name="walletInfo" options={{}} />
