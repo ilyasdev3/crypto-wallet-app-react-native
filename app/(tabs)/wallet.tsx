@@ -1,11 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Avatar from "@/components/reuseable/Avatar";
 import WalletCard from "@/components/WalletCard";
 import TabCard from "@/components/TabCard";
 import { FontAwesome5 } from "@expo/vector-icons";
-import ButtonsSection from "@/components/ButtonsSection";
 
 const Page = () => {
   return (
