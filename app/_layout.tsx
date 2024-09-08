@@ -1,37 +1,27 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+const RootLayout = () => {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      {/* Optionally configure static options outside the route.*/}
+      {/* <Stack.Screen name="wallet" options={{}} /> */}
+      <Stack.Screen name="(tabs)" options={{}} />
+      <Stack.Screen name="CointDetails" options={{}} />
+      <Stack.Screen name="NewsFeed" options={{}} />
+      <Stack.Screen name="ProfilePhoto" options={{}} />
+      <Stack.Screen name="walletInfo" options={{}} />
+      <Stack.Screen name="Username" options={{}} />
+      <Stack.Screen name="Password" options={{}} />
+      <Stack.Screen name="Register" options={{}} />
+      <Stack.Screen name="EditProfile" options={{}} />
+      <Stack.Screen name="Login" options={{}} />
+      <Stack.Screen name="NewsCreation" options={{}} />
+    </Stack>
   );
-}
+};
+
+export default RootLayout;
