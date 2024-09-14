@@ -10,6 +10,9 @@ const RootLayout = () => {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="walletInfo" options={{ headerShown: false }} />
+        <Stack.Screen name="CoinDetails" options={{ headerShown: false }} />
+        <Stack.Screen name="NewsFeed" options={{ headerShown: false }} />
       </Stack>
     </ApolloProvider>
   );
