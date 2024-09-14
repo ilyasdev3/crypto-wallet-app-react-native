@@ -6,6 +6,10 @@ export const GET_CURRENT_USER = gql`
       id
       username
       profileImage
+      firstName
+      lastName
+      email
+      bio
     }
   }
 `;
