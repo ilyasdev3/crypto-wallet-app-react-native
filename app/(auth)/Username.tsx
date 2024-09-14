@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,65 +6,60 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-import { router, useRouter } from "expo-router";
+import { router } from "expo-router";
 import { useMutation } from "@apollo/client";
-import { MaterialIcons } from "@expo/vector-icons"; // Ensure you have @expo/vector-icons installed
-import { CHECK_USERNAME } from "../lib/graphql/user/user.mutations";
+import { CHECK_USERNAME } from "../../lib/graphql/user/user.mutations";
 
 const UsernameScreen = () => {
+  console.log("UsernameScreen rendered");
+
   const [username, setUsername] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState("");
-  const [isValid, setIsValid] = useState(false);
+  const [message, setMessage] = useState("");
 
   const [checkUsername, { loading }] = useMutation(CHECK_USERNAME, {
     onCompleted: (data) => {
       console.log("Mutation completed successfully:", data);
-      setUsernameStatus(data.checkUsername);
-      setIsValid(true);
-      // Navigate to the next screen after a short delay
-      setTimeout(() => router.push(`/Password?username=${username}`), 500);
+      setMessage(data.checkUsername);
+      if (data.checkUsername === "Username available") {
+        console.log("Username is available, redirecting to Password screen");
+        return router.push(`/(auth)/Password?username=${username}`);
+      } else {
+        console.log(
+          "Username is not available, redirecting to Username screen"
+        );
+
+        setMessage("Username is not available");
+        return;
+      }
     },
     onError: (error) => {
-      // console.error("Mutation error:", error);
-      setUsernameStatus(error.message);
-      setIsValid(false);
+      setMessage(error.message);
     },
   });
 
   const handleCheckUsername = () => {
-    setUsernameStatus("checking username availability...");
-    if (username.length > 0) {
-      checkUsername({ variables: { username } });
+    if (username.length >= 5) {
+      setMessage("Checking username availability...");
+      checkUsername({ variables: { username } }).catch((error) => {
+        console.error("Mutation error caught:", error);
+        setMessage(error.message);
+        Alert.alert("Error", "Failed to check username. Please try again.");
+      });
+    } else {
+      setMessage("Username must be at least 5 characters long");
     }
   };
 
   const getStatusColor = () => {
     if (loading) return "text-yellow-500";
-    if (isValid) return "text-green-500";
+    if (message === "Username available") return "text-green-500";
     return "text-red-500";
   };
 
-  useEffect(() => {
-    if (usernameStatus) {
-      const timer = setTimeout(() => {
-        setUsernameStatus("");
-      }, 5000);
-      return () => clearTimeout(timer); // Cleanup the timeout if the component unmounts or usernameStatus changes
-    }
-  }, [usernameStatus]);
-
   return (
     <View className="flex-1 bg-white p-6 justify-center">
-      <TouchableOpacity
-        onPress={() => router.back()}
-        className="absolute top-10 left-6 z-10"
-      >
-        <View className="flex-row items-center justify-center bg-slate-200 rounded-full p-1">
-          <MaterialIcons name="arrow-back" size={24} color="black" />
-        </View>
-      </TouchableOpacity>
-
       <Text className="text-2xl font-bold mb-4">Choose a username</Text>
       <Text className="text-gray-500 mb-8">
         This will be your public handle
@@ -76,8 +71,7 @@ const UsernameScreen = () => {
           value={username}
           onChangeText={(text) => {
             setUsername(text);
-            setUsernameStatus("");
-            setIsValid(false);
+            setMessage("");
           }}
           className="flex-1"
           autoCapitalize="none"
@@ -90,9 +84,7 @@ const UsernameScreen = () => {
         />
       </View>
 
-      {usernameStatus && (
-        <Text className={`mb-4 ${getStatusColor()}`}>{usernameStatus}</Text>
-      )}
+      {message && <Text className={`mb-4 ${getStatusColor()}`}>{message}</Text>}
 
       <TouchableOpacity
         className={`bg-[#23C562] p-4 rounded-lg items-center ${
@@ -110,7 +102,7 @@ const UsernameScreen = () => {
 
       <TouchableOpacity
         className="p-4 mt-4"
-        onPress={() => router.push("/Login")}
+        onPress={() => router.push("/(auth)/Login")}
       >
         <Text className="text-center text-blue-500 text-lg">
           Already have an account? Login

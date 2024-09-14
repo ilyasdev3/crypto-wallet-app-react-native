@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
+import { useNavigation, router } from "expo-router";
 import ProfilePostCard from "@/components/ProfilePostCard";
 import UserCard from "@/components/UserCard";
+import { removeToken } from "@/utils/auth";
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Posts");
@@ -169,24 +170,24 @@ const ProfilePage = () => {
       isFollowing: false,
     },
   ];
+  const handleLogout = async () => {
+    try {
+      await removeToken();
+      console.log("User logged out");
+      router.replace("/(auth)/Username");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
+  // Inside your return function
   return (
     <View className="flex-1 bg-gray-100 ">
       {/* Header */}
-      {/* <View className="p-4 bg-white flex-row justify-between items-center shadow-sm">
-        <TouchableOpacity>
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text className="text-lg font-bold">Profile</Text>
-        <TouchableOpacity>
-          <Ionicons name="settings-outline" size={24} color="black" />
-        </TouchableOpacity>
-      </View> */}
-
       {/* Profile Info */}
       <View className="p-4 bg-white items-center shadow-md pt-10">
         <Image
-          source={{ uri: "https://randomuser.me/api/portraits/men/62.jpg" }} // Change to actual profile image path
+          source={{ uri: "https://randomuser.me/api/portraits/men/62.jpg" }}
           className="w-24 h-24 rounded-full"
         />
         <Text className="mt-2 text-xl font-bold text-black">Ann Korkowski</Text>
@@ -212,12 +213,22 @@ const ProfilePage = () => {
         </View>
 
         {/* Edit Profile Button */}
-        <TouchableOpacity
-          className="mt-4 bg-[#23C562] py-2 px-8 rounded-lg"
-          onPress={() => navigation.navigate("EditProfile") as any}
-        >
-          <Text className="text-white text-lg font-bold">Edit Profile</Text>
-        </TouchableOpacity>
+        <View className="flex-row justify-between items-center gap-5  mt-1">
+          <TouchableOpacity
+            className="mt-4 bg-[#23C562] py-2 px-8 rounded-lg"
+            onPress={() => navigation.navigate("EditProfile") as any}
+          >
+            <Text className="text-white text-lg font-bold">Edit Profile</Text>
+          </TouchableOpacity>
+
+          {/* Logout Button */}
+          <TouchableOpacity
+            className="mt-4 bg-red-500 py-2 px-8 rounded-lg"
+            onPress={handleLogout}
+          >
+            <Text className="text-white text-lg font-bold">Logout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Tabs (Posts, Followers, Following) */}

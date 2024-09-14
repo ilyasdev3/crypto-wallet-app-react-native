@@ -122,6 +122,7 @@ import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AuthGuard from "@/components/AuthGuard";
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -225,18 +226,19 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
 const TabLayout = () => {
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="wallet" options={{ title: "Wallet" }} />
-      <Tabs.Screen name="cryptolist" options={{ title: "Crypto List" }} />
-      {/* <Tabs.Screen name="chat" options={{ title: "Chat" }} /> */}
-      <Tabs.Screen name="Profile" options={{ title: "Profile" }} />
-    </Tabs>
+    <AuthGuard>
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Tabs.Screen name="home" options={{ title: "Home" }} />
+        <Tabs.Screen name="wallet" options={{ title: "Wallet" }} />
+        <Tabs.Screen name="cryptolist" options={{ title: "Crypto List" }} />
+        <Tabs.Screen name="Profile" options={{ title: "Profile" }} />
+      </Tabs>
+    </AuthGuard>
   );
 };
 

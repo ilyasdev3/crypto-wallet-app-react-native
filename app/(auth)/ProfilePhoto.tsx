@@ -12,22 +12,23 @@ import { router, useNavigation } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useMutation } from "@apollo/client";
-import { CREATE_USER } from "../lib/graphql/user/user.mutations";
-
+import { CREATE_USER } from "../../lib/graphql/user/user.mutations";
+import { setToken } from "@/utils/auth";
 const ProfilePhotoScreen = () => {
   const [profileImage, setProfileImage] = useState<any>(null);
   const [message, setMessage] = useState("");
-
-  const navigation: any = useNavigation();
 
   const params = useLocalSearchParams();
   const { username, password } = params;
 
   const [createUser, { loading }] = useMutation(CREATE_USER, {
-    onCompleted: (data) => {
-      console.log("User created successfully:", data);
+    onCompleted: async (data) => {
+      console.log("User created successfully:", data.createUser.token);
       setMessage("User created successfully");
-      setTimeout(() => navigation.navigate("(tabs)"), 1500);
+      await setToken(data.createUser.token);
+
+      // Redirect to main app after a short delay
+      setTimeout(() => router.replace("/(tabs)"), 1500);
     },
     onError: (error) => {
       console.error("Error creating user:", error);
@@ -89,6 +90,9 @@ const ProfilePhotoScreen = () => {
       });
 
       console.log("Upload successful:", response.data);
+      await setToken(response.data.createUser.token);
+      router.replace("/(tabs)/home");
+
       setMessage("User created successfully!");
     } catch (error) {
       console.error("Upload failed:", error);
