@@ -22,3 +22,9 @@ export const USER_LOGIN = gql`
     }
   }
 `;
+
+export const UPDATE_USER = gql`
+  mutation Mutation($user: UpdateUserInput!) {
+    updateUser(user: $user)
+  }
+`;
