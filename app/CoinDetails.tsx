@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import debounce from "lodash.debounce";
@@ -111,6 +111,24 @@ const CoinDetailsScreen = () => {
     return (
       <SafeAreaView className="flex-1 bg-white justify-center items-center">
         <Text>Error loading data</Text>
+        <TouchableOpacity
+          className="bg-red-500 p-4 rounded-lg items-center mt-4"
+          onPress={() => {
+            console.log("reloading");
+            router.replace("/CoinDetails");
+          }}
+        >
+          <Text>Reload</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="bg-green-500 p-4 rounded-lg items-center mt-4"
+          onPress={() => {
+            console.log("reloading");
+            router.replace("/(tabs)/home");
+          }}
+        >
+          <Text>Go to home screen</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
