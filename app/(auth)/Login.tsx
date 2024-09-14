@@ -1,17 +1,68 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { useNavigation } from "expo-router";
+import { useMutation } from "@apollo/client";
+import { USER_LOGIN } from "../../lib/graphql/user/user.mutations";
+import { router } from "expo-router";
+import { setToken } from "@/utils/auth";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigation: any = useNavigation();
+  const [message, setMessage] = useState("");
+  const [isValid, setIsValid] = useState(false);
+
+  const [loginUser, { loading }] = useMutation(USER_LOGIN, {
+    onCompleted: (data) => {
+      console.log("Mutation completed successfully:", data);
+      setMessage(data.loginUser.message);
+      console.log("Token:", data.loginUser.token);
+
+      setIsValid(true);
+      setToken(data.loginUser.token);
+      // Redirect to home page or newsfeed after login
+      router.replace("/(tabs)/home");
+    },
+    onError: (error) => {
+      console.error("Mutation error:", error);
+      setMessage(error.message);
+    },
+  });
 
   const handleLogin = () => {
+    setMessage("");
+    if (!username || !password) {
+      setMessage("Please enter a username and password");
+      setIsValid(false);
+    }
     // Add login logic here
     console.log("Username: ", username, "Password: ", password);
+
+    if (username.length < 5 || password.length < 8) {
+      setMessage("Username or password is too short");
+      setIsValid(false);
+    }
+    if (username.length >= 5) {
+      console.log("inside if");
+      const user = { username, password };
+      loginUser({ variables: { user } }).catch((error) => {
+        console.error("Mutation error caught:", error);
+        setMessage(error.message);
+        // Alert.alert("Error", "Failed to check username. Please try again.");
+      });
+    } else {
+      setMessage("Username must be at least 5 characters long");
+    }
+
     // Redirect to home page or newsfeed after login
-    navigation.navigate("(tabs)");
+    // navigation.navigate("(tabs)");
+  };
+
+  const getStatusColor = () => {
+    if (loading) return "text-yellow-500";
+    if (message === "Login successful") return "text-green-500";
+    return "text-red-500";
   };
 
   return (
@@ -44,6 +95,8 @@ const LoginPage = () => {
           className="bg-gray-100 p-3 rounded-lg text-lg border border-gray-300"
         />
       </View>
+
+      {message && <Text className={`mb-4 ${getStatusColor()}`}>{message}</Text>}
 
       <TouchableOpacity
         onPress={handleLogin}
