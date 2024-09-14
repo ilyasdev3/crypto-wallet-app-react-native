@@ -11,6 +11,9 @@ import CryptoCoinCard from "@/components/reuseable/CryptoCoinCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Avatar from "@/components/reuseable/Avatar";
 import { FontAwesome5 } from "@expo/vector-icons"; // or another icon library
+import { useQuery } from "@apollo/client";
+import { GET_CURRENT_USER } from "@/lib/graphql/user/user.queries";
+import { fixImageUrl } from "@/utils/fixImageUrl.utils";
 
 // Sample Data for Crypto Coins
 const cryptoCoins = [
@@ -28,7 +31,7 @@ const cryptoCoins = [
     name: "Ethereum",
     symbol: "ETH",
     color: "bg-blue-500",
-    icon: "Ξ",
+    icon: "E",
     amount: "1.2 ETH",
     usdValue: "$2,800",
   },
@@ -143,6 +146,13 @@ const cryptoCoins = [
 ];
 
 const CryptoListScreen = () => {
+  const {
+    loading,
+    error,
+    data: currentUser,
+    refetch,
+  } = useQuery(GET_CURRENT_USER);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
@@ -163,7 +173,7 @@ const CryptoListScreen = () => {
       <View className="flex-row justify-between items-center p-4">
         <Avatar
           imageSource={{
-            uri: "https://randomuser.me/api/portraits/men/62.jpg",
+            uri: fixImageUrl(currentUser?.me?.profileImage),
           }}
         />
         <Text className="text-xl font-bold">Crypto List</Text>

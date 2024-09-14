@@ -1,10 +1,21 @@
-import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, router } from "expo-router";
 import ProfilePostCard from "@/components/ProfilePostCard";
 import UserCard from "@/components/UserCard";
 import { removeToken } from "@/utils/auth";
+import { useQuery } from "@apollo/client";
+import { GET_CURRENT_USER } from "@/lib/graphql/user/user.queries";
+import { fixImageUrl } from "@/utils/fixImageUrl.utils";
+import { getFullName } from "@/utils/getFullName";
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Posts");
@@ -180,6 +191,38 @@ const ProfilePage = () => {
     }
   };
 
+  const {
+    loading,
+    error,
+    data: currentUser,
+    refetch,
+  } = useQuery(GET_CURRENT_USER);
+  console.log("currentUser", currentUser);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text>Error loading data</Text>
+        <TouchableOpacity
+          onPress={() => {
+            console.log("reloading");
+            refetch();
+            ``;
+          }}
+        >
+          <Text>Reload</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   // Inside your return function
   return (
     <View className="flex-1 bg-gray-100 ">
@@ -187,13 +230,19 @@ const ProfilePage = () => {
       {/* Profile Info */}
       <View className="p-4 bg-white items-center shadow-md pt-10">
         <Image
-          source={{ uri: "https://randomuser.me/api/portraits/men/62.jpg" }}
+          source={{
+            uri:
+              fixImageUrl(currentUser?.me?.profileImage) ||
+              "https://randomuser.me/api/portraits/men/62.jpg",
+          }}
           className="w-24 h-24 rounded-full"
         />
-        <Text className="mt-2 text-xl font-bold text-black">Ann Korkowski</Text>
-        <Text className="text-gray-500">@anniekork</Text>
+        <Text className="mt-2 text-xl font-bold text-black">
+          {getFullName(currentUser?.me?.firstName, currentUser?.me?.lastName)}
+        </Text>
+        <Text className="text-gray-500">@{currentUser?.me?.username}</Text>
         <Text className="mt-2 text-center text-gray-700">
-          UX Designer | Traveler | Coffee Lover ☕
+          {currentUser?.me?.bio}
         </Text>
 
         {/* Followers and Following Stats */}
@@ -216,7 +265,9 @@ const ProfilePage = () => {
         <View className="flex-row justify-between items-center gap-5  mt-1">
           <TouchableOpacity
             className="mt-4 bg-[#23C562] py-2 px-8 rounded-lg"
-            onPress={() => navigation.navigate("EditProfile") as any}
+            onPress={() => {
+              navigation.navigate("EditProfile");
+            }}
           >
             <Text className="text-white text-lg font-bold">Edit Profile</Text>
           </TouchableOpacity>
