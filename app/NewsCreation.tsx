@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
+import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const NewsCreationPage = () => {
   const [title, setTitle] = useState("");
@@ -50,6 +52,15 @@ const NewsCreationPage = () => {
           Create News Post
         </Text>
 
+        {/* back button */}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="absolute  left-2 z-10"
+        >
+          <View className="flex-row items-center justify-center bg-slate-200 rounded-full p-1">
+            <MaterialIcons name="arrow-back" size={24} color="black" />
+          </View>
+        </TouchableOpacity>
         {/* Image Upload Section */}
         <View className="mb-6 items-center">
           {image ? (
