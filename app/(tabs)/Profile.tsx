@@ -319,7 +319,7 @@ const ProfilePage = () => {
               <ProfilePostCard
                 key={index}
                 userImage={post.userImage}
-                username={post.username}
+                username={post?.username}
                 userHandle={post.userHandle}
                 postText={post.postText}
                 postImage={post.postImage}
@@ -337,12 +337,12 @@ const ProfilePage = () => {
               <UserCard
                 key={index}
                 userImage={user.userImage}
-                username={user.username}
+                username={user?.username}
                 userHandle={user.userHandle}
                 isFollowing={user.isFollowing}
                 onFollowToggle={() => {
                   // Logic for follow/unfollow toggle
-                  console.log(`Toggled follow for ${user.username}`);
+                  console.log(`Toggled follow for ${user?.username}`);
                 }}
               />
             ))}
@@ -355,12 +355,12 @@ const ProfilePage = () => {
               <UserCard
                 key={index}
                 userImage={user.userImage}
-                username={user.username}
+                username={user?.username}
                 userHandle={user.userHandle}
                 isFollowing={user.isFollowing}
                 onFollowToggle={() => {
                   // Logic for follow/unfollow toggle
-                  console.log(`Toggled follow for ${user.username}`);
+                  console.log(`Toggled follow for ${user?.username}`);
                 }}
               />
             ))}

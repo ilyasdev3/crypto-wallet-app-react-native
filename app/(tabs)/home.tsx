@@ -1,12 +1,76 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import React, { useCallback, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Tabs from "@/components/reuseable/Tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useQuery } from "@apollo/client";
+import { GET_ALL_POSTS } from "@/lib/graphql/post/post.queries";
+
+import { GET_CURRENT_USER } from "@/lib/graphql/user/user.queries";
 import PostCard from "@/components/reuseable/PostCard";
+import { useFocusEffect } from "expo-router";
 
 const HomePage = () => {
   const [selectedTab, setSelectedTab] = useState("Trending");
+
+  const {
+    loading: userLoading,
+    error: userError,
+    data: currentUser,
+    refetch: refetchUser,
+  } = useQuery(GET_CURRENT_USER);
+
+  // pass filters as an object to get all posts
+  const {
+    loading,
+    error,
+    data: allPosts,
+    refetch: refetchPosts,
+  } = useQuery(GET_ALL_POSTS, {
+    variables: {
+      filters: {
+        length: 10,
+      },
+    },
+    fetchPolicy: "network-only", // Fetch fresh data every time
+  });
+
+  // Refetch posts when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      refetchPosts();
+    }, [refetchPosts])
+  );
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text>Error loading data</Text>
+        <TouchableOpacity
+          onPress={() => {
+            console.log("reloading");
+            ``;
+          }}
+        >
+          <Text>Reload</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const data = [
     {
@@ -144,17 +208,18 @@ const HomePage = () => {
 
         {/* Feed */}
         <ScrollView className="flex-1 bg-gray-100 p-4">
-          {data.map((post: any, index: any) => (
+          {allPosts?.getAllPosts.map((post: any, index: any) => (
             <PostCard
+              id={post?.id}
               key={index}
-              avatar={post.avatar}
-              username={post.username}
-              handle={post.handle}
-              postText={post.postText}
-              postImage={post.postImage}
-              likes={post.likes}
-              comments={post.comments}
-              shares={post.shares}
+              avatar={post?.userId?.profileImage}
+              username={post?.userId?.firstName + " " + post?.userId?.lastName}
+              handle={post?.userId?.username}
+              postText={post?.title}
+              postImage={post?.image}
+              likes={post?.likes}
+              stats={post?.stats}
+              currentUserId={currentUser?.me?.id}
             />
           ))}
         </ScrollView>

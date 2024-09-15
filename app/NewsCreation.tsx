@@ -11,38 +11,65 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useMutation } from "@apollo/client";
+import { CREATE_POST } from "@/lib/graphql/post/post.mutations";
 
 const NewsCreationPage = () => {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<any>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [message, setMessage] = useState("");
+  const [descLength, setDescLength] = useState(0);
+
+  const [createPost, { loading }] = useMutation(CREATE_POST);
 
   // Function to pick an image
   const pickImage = async () => {
-    // Ask for permission to access the gallery
     let permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       alert("Permission to access gallery is required!");
       return;
     }
 
-    let result: any = await ImagePicker.launchImageLibraryAsync({
+    let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [1, 1],
+      quality: 0.5,
+      base64: true,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri); // Set image URI
+    if (!result.canceled && result.assets[0].base64) {
+      setImage(result.assets[0].base64);
+      setImageUrl(result.assets[0].uri);
     }
   };
 
   const handleSubmit = () => {
-    // Add logic to create the news post
+    if (!title || !subtitle || !imageUrl) {
+      setMessage("Please fill out all fields.");
+      return;
+    }
+    if (descLength >= 100) {
+      setMessage("Description cannot exceed 100 characters.");
+      return;
+    }
     console.log({ title, subtitle, image });
+
+    createPost({
+      variables: {
+        post: {
+          title,
+          content: subtitle,
+          image: image,
+        },
+      },
+    });
+
+    // console.log({ title, subtitle, image });
   };
 
   return (
@@ -63,12 +90,28 @@ const NewsCreationPage = () => {
         </TouchableOpacity>
         {/* Image Upload Section */}
         <View className="mb-6 items-center">
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              className="w-full h-60 rounded-lg"
-              resizeMode="cover"
-            />
+          {imageUrl ? (
+            <>
+              {/* Cancel button */}
+              <TouchableOpacity
+                onPress={() => {
+                  setImageUrl("");
+                  setImage(null);
+                }}
+                className="absolute top-2 right-2 z-10"
+              >
+                <View className="flex-row items-center justify-center bg-slate-200 rounded-full p-1">
+                  <MaterialIcons name="close" size={24} color="black" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Image display */}
+              <Image
+                source={{ uri: imageUrl }}
+                className="w-full h-60 rounded-lg"
+                resizeMode="cover"
+              />
+            </>
           ) : (
             <TouchableOpacity
               onPress={pickImage}

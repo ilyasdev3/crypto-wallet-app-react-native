@@ -15,6 +15,7 @@ const RootLayout = () => {
         <Stack.Screen name="NewsFeed" options={{ headerShown: false }} />
         <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
         <Stack.Screen name="NewsCreation" options={{ headerShown: false }} />
+        <Stack.Screen name="SinglePost" options={{ headerShown: false }} />
       </Stack>
     </ApolloProvider>
   );
