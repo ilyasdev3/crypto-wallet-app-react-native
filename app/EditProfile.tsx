@@ -19,7 +19,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { fixImageUrl } from "@/utils/fixImageUrl.utils";
 
 const EditProfilePage = () => {
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -42,7 +42,11 @@ const EditProfilePage = () => {
       console.log("User updated successfully:", data);
       setMessage("User updated successfully");
       refetch();
-      setTimeout(() => router.replace("/Profile"), 1500);
+      setTimeout(() => {
+        navigation.navigate("Profile", {
+          userId: currentUser?.me?.id,
+        });
+      }, 1500);
     },
     onError: (error) => {
       console.error("Error updating user:", error);
@@ -134,10 +138,10 @@ const EditProfilePage = () => {
   }
 
   const handleSave = async () => {
-    // if (firstName === "" || lastName === "" || email === "" || bio === "") {
-    //   Alert.alert("Error", "Please fill out all fields.");
-    //   return;
-    // }
+    if (firstName === "" || lastName === "" || email === "" || bio === "") {
+      Alert.alert("Error", "Please fill out all fields.");
+      return;
+    }
 
     const updatedUser: any = {};
 
