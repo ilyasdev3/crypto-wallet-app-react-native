@@ -22,7 +22,15 @@ const NewsCreationPage = () => {
   const [message, setMessage] = useState("");
   const [descLength, setDescLength] = useState(0);
 
-  const [createPost, { loading }] = useMutation(CREATE_POST);
+  const [createPost, { loading }] = useMutation(CREATE_POST, {
+    onCompleted: (data) => {
+      console.log("Post created successfully:", data);
+      router.replace("/Profile");
+    },
+    onError: (error) => {
+      console.error("Error creating post:", error);
+    },
+  });
 
   // Function to pick an image
   const pickImage = async () => {
