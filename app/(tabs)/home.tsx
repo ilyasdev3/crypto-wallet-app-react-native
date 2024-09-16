@@ -214,6 +214,7 @@ const HomePage = () => {
               key={index}
               avatar={post?.userId?.profileImage}
               username={post?.userId?.firstName + " " + post?.userId?.lastName}
+              ownerId={post?.userId?.id}
               handle={post?.userId?.username}
               postText={post?.title}
               postImage={post?.image}

@@ -8,18 +8,26 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, router } from "expo-router";
+import { useNavigation, router, RouteParams } from "expo-router";
 import ProfilePostCard from "@/components/ProfilePostCard";
 import UserCard from "@/components/UserCard";
 import { removeToken } from "@/utils/auth";
 import { useQuery } from "@apollo/client";
-import { GET_CURRENT_USER } from "@/lib/graphql/user/user.queries";
+import {
+  GET_CURRENT_USER,
+  GET_USER_BY_ID,
+} from "@/lib/graphql/user/user.queries";
 import { fixImageUrl } from "@/utils/fixImageUrl.utils";
 import { getFullName } from "@/utils/getFullName";
+import { RouteProp, useRoute } from "@react-navigation/native";
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Posts");
   const navigation: any = useNavigation();
+
+  const route: any = useRoute<RouteProp<RouteParams<any>>>();
+  const { userId } = route.params;
+
   const data = [
     {
       userImage: "https://randomuser.me/api/portraits/men/60.jpg",
@@ -197,7 +205,19 @@ const ProfilePage = () => {
     data: currentUser,
     refetch,
   } = useQuery(GET_CURRENT_USER);
-  console.log("currentUser", currentUser);
+  console.log("currentUser", currentUser.me.id);
+
+  const {
+    loading: userLoading,
+    error: userError,
+    data: userData,
+  } = useQuery(GET_USER_BY_ID, {
+    variables: {
+      getUserId: userId,
+    },
+  });
+
+  console.log("userData", userData?.getUser?.id);
 
   if (loading) {
     return (
@@ -263,22 +283,36 @@ const ProfilePage = () => {
 
         {/* Edit Profile Button */}
         <View className="flex-row justify-between items-center gap-5  mt-1">
-          <TouchableOpacity
-            className="mt-4 bg-[#23C562] py-2 px-8 rounded-lg"
-            onPress={() => {
-              navigation.navigate("EditProfile");
-            }}
-          >
-            <Text className="text-white text-lg font-bold">Edit Profile</Text>
-          </TouchableOpacity>
-
-          {/* Logout Button */}
-          <TouchableOpacity
-            className="mt-4 bg-red-500 py-2 px-8 rounded-lg"
-            onPress={handleLogout}
-          >
-            <Text className="text-white text-lg font-bold">Logout</Text>
-          </TouchableOpacity>
+          {currentUser?.me?.id !== userData?.getUser?.id ? (
+            <TouchableOpacity
+              className="mt-4 bg-blue-500 py-2 px-8 rounded-lg"
+              onPress={() => {
+                navigation.navigate("EditProfile");
+              }}
+            >
+              <Text className="text-white text-lg font-bold">Follow</Text>
+            </TouchableOpacity>
+          ) : (
+            // Edit and logout buttons for other users
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity
+                className="mt-4 bg-[#23C562] py-3 px-8 rounded-lg"
+                onPress={() => {
+                  navigation.navigate("EditProfile");
+                }}
+              >
+                <Text className="text-white text-lg font-bold">
+                  Edit Profile
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="mt-4 bg-red-500 py-3 px-8 rounded-lg"
+                onPress={handleLogout}
+              >
+                <Text className="text-white text-lg font-bold">Logout</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
 

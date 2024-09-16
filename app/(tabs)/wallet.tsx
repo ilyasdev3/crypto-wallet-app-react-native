@@ -15,6 +15,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useQuery } from "@apollo/client";
 import { GET_WALLET } from "../../lib/graphql/wallet/wallet.queries";
 import QRCode from "react-native-qrcode-svg"; // For QR code generation
+import ButtonsSection from "@/components/ButtonsSection";
 
 const Page = () => {
   const { loading, error, data: walletData, refetch } = useQuery(GET_WALLET);
@@ -106,6 +107,7 @@ const Page = () => {
             </Text>
           </View>
         </View>
+        <ButtonsSection />
       </ScrollView>
     </SafeAreaView>
   );
