@@ -15,16 +15,22 @@ const PostCard = ({
   id,
   currentUserId,
   stats,
+  ownerId,
 }: any) => {
   const navigation: any = useNavigation();
 
   return (
     <View className="p-4 bg-white shadow-md my-2 rounded-lg">
       <View className="flex-row items-center mb-2">
-        <Image
-          source={{ uri: fixImageUrl(avatar) }}
-          className="w-10 h-10 rounded-full"
-        />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Profile", { userId: ownerId })}
+        >
+          <Image
+            source={{ uri: fixImageUrl(avatar) }}
+            className="w-10 h-10 rounded-full"
+          />
+        </TouchableOpacity>
+
         <View className="ml-2">
           <Text className="font-bold text-black">{username}</Text>
           <Text className="text-gray-500">@{handle}</Text>
