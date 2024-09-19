@@ -34,3 +34,38 @@ export const GET_USER_BY_ID = gql`
     }
   }
 `;
+export const GET_USER_FOLLOWERS = gql`
+  query GetUserFollowers($getUserFollowersId: ID!) {
+    getUserFollowers(id: $getUserFollowersId) {
+      id
+      username
+      profileImage
+      firstName
+      lastName
+      email
+      bio
+      createdAt
+      updatedAt
+      following
+      followers
+    }
+  }
+`;
+
+export const GET_USER_FOLLOWING = gql`
+  query GetUserFollowing($getUserFollowingId: ID!) {
+    getUserFollowing(id: $getUserFollowingId) {
+      id
+      username
+      profileImage
+      firstName
+      lastName
+      email
+      bio
+      createdAt
+      updatedAt
+      following
+      followers
+    }
+  }
+`;
