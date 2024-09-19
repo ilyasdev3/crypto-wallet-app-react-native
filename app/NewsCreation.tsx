@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -25,7 +26,7 @@ const NewsCreationPage = () => {
   const [createPost, { loading }] = useMutation(CREATE_POST, {
     onCompleted: (data) => {
       console.log("Post created successfully:", data);
-      router.replace("/Profile");
+      router.replace("/");
     },
     onError: (error) => {
       console.error("Error creating post:", error);
@@ -65,7 +66,6 @@ const NewsCreationPage = () => {
       setMessage("Description cannot exceed 100 characters.");
       return;
     }
-    console.log({ title, subtitle, image });
 
     createPost({
       variables: {
@@ -76,8 +76,6 @@ const NewsCreationPage = () => {
         },
       },
     });
-
-    // console.log({ title, subtitle, image });
   };
 
   return (
@@ -90,12 +88,13 @@ const NewsCreationPage = () => {
         {/* back button */}
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute  left-2 z-10"
+          className="absolute left-2 z-10"
         >
           <View className="flex-row items-center justify-center bg-slate-200 rounded-full p-1">
             <MaterialIcons name="arrow-back" size={24} color="black" />
           </View>
         </TouchableOpacity>
+
         {/* Image Upload Section */}
         <View className="mb-6 items-center">
           {imageUrl ? (
@@ -159,13 +158,23 @@ const NewsCreationPage = () => {
           />
         </View>
 
-        {/* Submit Button */}
+        {/* Show Loader if creating post */}
+
         <TouchableOpacity
           onPress={handleSubmit}
           className="bg-green-500 p-4 rounded-lg items-center mb-4"
         >
-          <Text className="text-white text-lg font-bold">Create News</Text>
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-lg font-bold">Create News</Text>
+          )}
         </TouchableOpacity>
+
+        {/* Display message if any */}
+        {message ? (
+          <Text className="text-red-500 text-center mb-4">{message}</Text>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
