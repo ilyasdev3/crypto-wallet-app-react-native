@@ -1,20 +1,28 @@
 import { gql } from "@apollo/client";
 
 export const GET_USER_POSTS = gql`
-  query GetUserPosts($userId: ID!) {
-    getUserPosts(userId: $userId) {
+  query GetUserPosts($getUserPostsId: ID!) {
+    getUserPosts(id: $getUserPostsId) {
       id
-      title
-      content
-      createdAt
-      updatedAt
-      userId
       image
+      isVerified
+      likes
       stats {
+        totalShares
         totalLikes
         totalComments
-        totalShares
       }
+      title
+      updatedAt
+      userId {
+        username
+        profileImage
+        lastName
+        firstName
+      }
+
+      content
+      createdAt
     }
   }
 `;
@@ -65,6 +73,22 @@ export const GET_ALL_POSTS = gql`
         totalComments
         totalShares
       }
+    }
+  }
+`;
+
+export const GET_USER_FOLLOWING_POSTS = gql`
+  query Query {
+    getFollowingPosts {
+      likes
+      content
+      userId {
+        lastName
+        firstName
+        profileImage
+        username
+      }
+      image
     }
   }
 `;
