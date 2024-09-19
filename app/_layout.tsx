@@ -1,26 +1,23 @@
+import React from "react";
 import { Stack } from "expo-router";
+import { ApolloProvider } from "@apollo/client";
+import client from "../lib/apollo-client";
 
 const RootLayout = () => {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      {/* Optionally configure static options outside the route.*/}
-      {/* <Stack.Screen name="wallet" options={{}} /> */}
-      <Stack.Screen name="(tabs)" options={{}} />
-      <Stack.Screen name="CointDetails" options={{}} />
-      <Stack.Screen name="NewsFeed" options={{}} />
-      <Stack.Screen name="ProfilePhoto" options={{}} />
-      <Stack.Screen name="walletInfo" options={{}} />
-      <Stack.Screen name="Username" options={{}} />
-      <Stack.Screen name="Password" options={{}} />
-      <Stack.Screen name="Register" options={{}} />
-      <Stack.Screen name="EditProfile" options={{}} />
-      <Stack.Screen name="Login" options={{}} />
-      <Stack.Screen name="NewsCreation" options={{}} />
-    </Stack>
+    <ApolloProvider client={client}>
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="walletInfo" options={{ headerShown: false }} />
+        <Stack.Screen name="CoinDetails" options={{ headerShown: false }} />
+        <Stack.Screen name="NewsFeed" options={{ headerShown: false }} />
+        <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
+        <Stack.Screen name="NewsCreation" options={{ headerShown: false }} />
+        <Stack.Screen name="SinglePost" options={{ headerShown: false }} />
+      </Stack>
+    </ApolloProvider>
   );
 };
 

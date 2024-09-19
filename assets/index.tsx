@@ -148,7 +148,7 @@ const TabNavgator = () => {
             <PostCard
               key={index}
               avatar={post.avatar}
-              username={post.username}
+              username={post?.username}
               handle={post.handle}
               postText={post.postText}
               postImage={post.postImage}

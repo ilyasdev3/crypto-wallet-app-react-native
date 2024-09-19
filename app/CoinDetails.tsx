@@ -10,7 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import debounce from "lodash.debounce";
 
@@ -34,7 +35,10 @@ const fetchCoinData = async (currency: string, days: number) => {
     return {
       name: coin.name,
       symbol: coin.symbol,
+      image: coin.image.large,
+
       price: coin.market_data.current_price.usd,
+      volume: coin.market_data.total_volume.usd,
       changePercentage: coin.market_data.price_change_percentage_24h,
       chartData: {
         labels,
@@ -47,13 +51,23 @@ const fetchCoinData = async (currency: string, days: number) => {
   }
 };
 
+type RouteParams = {
+  coin: any;
+};
+
 const CoinDetailsScreen = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("3M");
+  const route: any = useRoute<RouteProp<RouteParams>>();
+  const coin = route.params.coin;
+  console.log("coin", coin);
+
+  const [selectedPeriod, setSelectedPeriod] = useState("1D");
   const [selectedTab, setSelectedTab] = useState("Top");
   const [coinData, setCoinData] = useState<{
     name: string;
     symbol: string;
+    image: string;
     price: number;
+    volume: number;
     changePercentage: number;
     chartData: {
       labels: string[];
@@ -72,7 +86,7 @@ const CoinDetailsScreen = () => {
       debounce(async (period: string) => {
         setLoading(true);
         const data = await fetchCoinData(
-          "bitcoin",
+          coin ? coin : "bitcoin",
           period === "1D" ? 1 : period === "7D" ? 7 : 30
         );
         setCoinData(data);
@@ -97,6 +111,24 @@ const CoinDetailsScreen = () => {
     return (
       <SafeAreaView className="flex-1 bg-white justify-center items-center">
         <Text>Error loading data</Text>
+        <TouchableOpacity
+          className="bg-red-500 p-4 rounded-lg items-center mt-4"
+          onPress={() => {
+            console.log("reloading");
+            router.replace("/CoinDetails");
+          }}
+        >
+          <Text>Reload</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="bg-green-500 p-4 rounded-lg items-center mt-4"
+          onPress={() => {
+            console.log("reloading");
+            router.replace("/(tabs)/home");
+          }}
+        >
+          <Text>Go to home screen</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -110,10 +142,7 @@ const CoinDetailsScreen = () => {
             <FontAwesome5 name="chevron-left" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-row items-center">
-            <Image
-              source={require("../assets/images/bitcoin.png")}
-              className="w-8 h-8 mr-2"
-            />
+            <Image source={{ uri: coinData.image }} className="w-8 h-8 mr-2" />
             <Text className="text-lg font-bold">{coinData.name}</Text>
           </View>
           <TouchableOpacity>
@@ -232,11 +261,14 @@ const CoinDetailsScreen = () => {
         {/* Live Data */}
         {selectedTab === "Top" && (
           <View className="mt-4">
-            <Text className="text-lg font-bold mb-2">BTC Price Live Data</Text>
+            <Text className="text-lg font-bold mb-2">
+              {coinData.name} Price Live Data
+            </Text>
             <Text className="text-sm text-gray-600">
               The live Bitcoin price today is ${coinData.price.toLocaleString()}
-              USD with a 24-hour trading volume of $32,393,371,349 USD. We
-              update our BTC to USD price in real-time.
+              USD with a 24-hour trading volume of $
+              {coinData.volume.toLocaleString()}
+              USD. We update our BTC to USD price in real-time.
             </Text>
           </View>
         )}

@@ -8,4 +8,11 @@ export type RootStackParamList = {
   Explore: undefined;
   EditProfile: undefined;
   NewsFeed: undefined;
+  index: undefined;
+  (tabs: undefined): undefined;
+  Username: undefined;
+  Password: undefined;
+  NewsCreation: undefined;
+  walletInfo: undefined;
+  CoinDetails: undefined;
 };

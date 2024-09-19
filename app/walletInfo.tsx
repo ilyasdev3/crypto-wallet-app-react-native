@@ -8,8 +8,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Avatar from "@/components/reuseable/Avatar";
-import { FontAwesome5 } from "@expo/vector-icons"; // or another icon library
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons"; // or another icon library
 import TransactionsFlatList from "@/components/TransactionsFlatList";
+import { router } from "expo-router";
 
 const tabs = ["Completed", "Pending", "Transfers"];
 
@@ -137,19 +138,20 @@ const WalletPage = () => {
     <SafeAreaView className="bg-[#FFFFFF] flex-1">
       {/* Header Section */}
       <View className="flex-row justify-between items-center p-4">
-        <Avatar
-          imageSource={{
-            uri: "https://randomuser.me/api/portraits/men/62.jpg",
-          }}
-        />
-        <Text className="text-xl font-bold">My Wallet</Text>
-        <TouchableOpacity>
-          <FontAwesome5 name="search" size={24} color="black" />
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="absolute top-4 left-6 z-10"
+        >
+          <View className="flex-row items-center justify-center bg-slate-200 rounded-full p-1">
+            <MaterialIcons name="arrow-back" size={24} color="black" />
+          </View>
         </TouchableOpacity>
+        <Text className="text-xl font-bold text-center w-full">My Wallet</Text>
+        {/* back button */}
       </View>
 
       {/* Tabs Section */}
-      <View className="flex-row justify-around bg-[#F5F5F5] p-4 rounded-t-lg">
+      <View className="flex-row justify-around bg-[#F5F5F5] p-4 rounded-t-lg mt-5">
         {tabs.map((tab, index) => (
           <TouchableOpacity
             key={index}
