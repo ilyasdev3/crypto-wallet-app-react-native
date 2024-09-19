@@ -12,7 +12,10 @@ import Tabs from "@/components/reuseable/Tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useQuery } from "@apollo/client";
-import { GET_ALL_POSTS } from "@/lib/graphql/post/post.queries";
+import {
+  GET_ALL_POSTS,
+  GET_USER_FOLLOWING_POSTS,
+} from "@/lib/graphql/post/post.queries";
 
 import { GET_CURRENT_USER } from "@/lib/graphql/user/user.queries";
 import PostCard from "@/components/reuseable/PostCard";
@@ -42,6 +45,15 @@ const HomePage = () => {
     },
     fetchPolicy: "network-only", // Fetch fresh data every time
   });
+
+  const {
+    loading: userFollowersPostsLoader,
+    error: userFollowersPosttError,
+    data: userFollowersPosts,
+    refetch: refetchUserFollowersPosts,
+  } = useQuery(GET_USER_FOLLOWING_POSTS);
+
+  console.log("userFollowersPosts", userFollowersPosts);
 
   // Refetch posts when the screen is focused
   useFocusEffect(
@@ -207,22 +219,57 @@ const HomePage = () => {
         {/* Tabs */}
 
         {/* Feed */}
+
+        {/* if active tab is following, show posts from the user's following */}
         <ScrollView className="flex-1 bg-gray-100 p-4">
-          {allPosts?.getAllPosts.map((post: any, index: any) => (
-            <PostCard
-              id={post?.id}
-              key={index}
-              avatar={post?.userId?.profileImage}
-              username={post?.userId?.firstName + " " + post?.userId?.lastName}
-              ownerId={post?.userId?.id}
-              handle={post?.userId?.username}
-              postText={post?.title}
-              postImage={post?.image}
-              likes={post?.likes}
-              stats={post?.stats}
-              currentUserId={currentUser?.me?.id}
-            />
-          ))}
+          {selectedTab === "Following" &&
+          userFollowersPosts?.getFollowingPosts ? (
+            userFollowersPosts?.getFollowingPosts.map(
+              (post: any, index: any) => (
+                <PostCard
+                  id={post?.id}
+                  key={index}
+                  avatar={post?.userId?.profileImage}
+                  username={
+                    post?.userId?.firstName + " " + post?.userId?.lastName
+                      ? post?.userId?.firstName + " " + post?.userId?.lastName
+                      : "No Name"
+                  }
+                  ownerId={post?.userId?.id}
+                  handle={post?.userId?.username}
+                  postText={post?.title}
+                  postImage={post?.image}
+                  likes={post?.likes}
+                  stats={post?.stats}
+                  currentUserId={currentUser?.me?.id}
+                />
+              )
+            )
+          ) : selectedTab === "Trending" && allPosts?.getAllPosts.length > 0 ? (
+            allPosts?.getAllPosts.map((post: any, index: any) => (
+              <PostCard
+                id={post?.id}
+                key={index}
+                avatar={post?.userId?.profileImage}
+                username={
+                  post?.userId?.firstName + " " + post?.userId?.lastName
+                    ? post?.userId?.firstName + " " + post?.userId?.lastName
+                    : "No Name"
+                }
+                ownerId={post?.userId?.id}
+                handle={post?.userId?.username}
+                postText={post?.title}
+                postImage={post?.image}
+                likes={post?.likes}
+                stats={post?.stats}
+                currentUserId={currentUser?.me?.id}
+              />
+            ))
+          ) : (
+            <View className="flex-1 justify-center items-center bg-white">
+              <Text>No posts yet</Text>
+            </View>
+          )}
         </ScrollView>
       </View>
     </SafeAreaView>

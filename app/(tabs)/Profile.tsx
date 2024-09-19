@@ -12,11 +12,15 @@ import { useNavigation, router, RouteParams } from "expo-router";
 import ProfilePostCard from "@/components/ProfilePostCard";
 import UserCard from "@/components/UserCard";
 import { removeToken } from "@/utils/auth";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   GET_CURRENT_USER,
   GET_USER_BY_ID,
+  GET_USER_FOLLOWERS,
+  GET_USER_FOLLOWING,
 } from "@/lib/graphql/user/user.queries";
+import { FOLLOW_USER_UNFOLLOW_USER } from "@/lib/graphql/user/user.mutations";
+import { GET_USER_POSTS } from "@/lib/graphql/post/post.queries";
 import { fixImageUrl } from "@/utils/fixImageUrl.utils";
 import { getFullName } from "@/utils/getFullName";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -27,6 +31,8 @@ const ProfilePage = () => {
 
   const route: any = useRoute<RouteProp<RouteParams<any>>>();
   const { userId } = route.params;
+
+  console.log("userId", userId);
 
   const data = [
     {
@@ -204,21 +210,93 @@ const ProfilePage = () => {
     error,
     data: currentUser,
     refetch,
-  } = useQuery(GET_CURRENT_USER);
-  console.log("currentUser", currentUser.me.id);
+  } = useQuery(GET_CURRENT_USER, {
+    fetchPolicy: "no-cache",
+  });
 
   const {
     loading: userLoading,
     error: userError,
     data: userData,
+    refetch: refetchUser,
   } = useQuery(GET_USER_BY_ID, {
     variables: {
       getUserId: userId,
     },
+    fetchPolicy: "no-cache",
   });
 
-  console.log("userData", userData?.getUser?.id);
+  const {
+    loading: userPostsLoader,
+    error: userPostsError,
+    data: userPostsData,
+    refetch: refetchUserPosts,
+  } = useQuery(GET_USER_POSTS, {
+    variables: {
+      getUserPostsId: userId,
+    },
+  });
 
+  const {
+    loading: userFollowersLoader,
+    error: userFollowersError,
+    data: userFollowersData,
+    refetch: refetchUserFollowers,
+  } = useQuery(GET_USER_FOLLOWERS, {
+    variables: {
+      getUserFollowersId: userId,
+    },
+  });
+  const {
+    loading: userFollowingLoader,
+    error: userFollowingError,
+    data: userFollowingData,
+    refetch: refetchUserFollowing,
+  } = useQuery(GET_USER_FOLLOWING, {
+    variables: {
+      getUserFollowingId: userId,
+    },
+  });
+
+  const [followUser, { loading: followLoading }] = useMutation(
+    FOLLOW_USER_UNFOLLOW_USER,
+
+    {
+      onCompleted: (data) => {
+        console.log("User followed successfully:", data);
+        refetch();
+        refetchUser({
+          getUserId: userId,
+        });
+        refetchUserPosts({
+          getUserPostsId: userId,
+        });
+        refetchUserFollowers({
+          getUserFollowersId: userId,
+        });
+        refetchUserFollowing({
+          getUserFollowingId: userId,
+        });
+      },
+      onError: (error) => {
+        console.error("Error following user:", error);
+      },
+    }
+  );
+
+  // console.log("userFollowersData", userFollowersData);
+
+  console.log(
+    "userFollowersData?.getUserFollowers",
+    userFollowersData?.getUserFollowers
+  );
+
+  console.log(
+    "checking followings",
+    userData?.getUser?.followers.includes(currentUser?.me?.id)
+  );
+
+  // console.log("user posts data", userPostsData?.getUserPosts[0]?.userId);
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -252,45 +330,67 @@ const ProfilePage = () => {
         <Image
           source={{
             uri:
-              fixImageUrl(currentUser?.me?.profileImage) ||
+              fixImageUrl(userData?.getUser?.profileImage) ||
               "https://randomuser.me/api/portraits/men/62.jpg",
           }}
           className="w-24 h-24 rounded-full"
         />
         <Text className="mt-2 text-xl font-bold text-black">
-          {getFullName(currentUser?.me?.firstName, currentUser?.me?.lastName)}
+          {getFullName(
+            userData?.getUser?.firstName,
+            userData?.getUser?.lastName
+          )}
         </Text>
-        <Text className="text-gray-500">@{currentUser?.me?.username}</Text>
+        <Text className="text-gray-500">@{userData?.getUser?.username}</Text>
         <Text className="mt-2 text-center text-gray-700">
-          {currentUser?.me?.bio}
+          {userData?.getUser?.bio}
         </Text>
 
         {/* Followers and Following Stats */}
         <View className="flex-row justify-around w-full mt-4">
           <View className="items-center">
-            <Text className="text-lg font-bold">234</Text>
+            <Text className="text-lg font-bold">
+              {userPostsData?.getUserPosts.length > 0
+                ? userPostsData?.getUserPosts.length
+                : 0}
+            </Text>
             <Text className="text-gray-500">Posts</Text>
           </View>
           <View className="items-center">
-            <Text className="text-lg font-bold">5.2k</Text>
+            <Text className="text-lg font-bold">
+              {userData?.getUser?.followers.length > 0
+                ? userData?.getUser?.followers.length
+                : 0}
+            </Text>
             <Text className="text-gray-500">Followers</Text>
           </View>
           <View className="items-center">
-            <Text className="text-lg font-bold">500</Text>
+            <Text className="text-lg font-bold">
+              {userData?.getUser?.following.length > 0
+                ? userData?.getUser?.following.length
+                : 0}
+            </Text>
             <Text className="text-gray-500">Following</Text>
           </View>
         </View>
 
-        {/* Edit Profile Button */}
         <View className="flex-row justify-between items-center gap-5  mt-1">
           {currentUser?.me?.id !== userData?.getUser?.id ? (
             <TouchableOpacity
               className="mt-4 bg-blue-500 py-2 px-8 rounded-lg"
               onPress={() => {
-                navigation.navigate("EditProfile");
+                followUser({
+                  variables: {
+                    userId: userData?.getUser?.id,
+                  },
+                });
               }}
             >
-              <Text className="text-white text-lg font-bold">Follow</Text>
+              <Text className="text-white text-lg font-bold">
+                {userData?.getUser?.followers.includes(currentUser?.me?.id)
+                  ? "Unfollow"
+                  : "Follow"}
+              </Text>
             </TouchableOpacity>
           ) : (
             // Edit and logout buttons for other users
@@ -344,60 +444,93 @@ const ProfilePage = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       <ScrollView className="flex-1 bg-gray-100 p-4">
-        {selectedTab === "Posts" && (
+        {selectedTab === "Posts" && userPostsData?.getUserPosts && (
           <ScrollView className="flex-1 bg-gray-100 p-4">
-            {/* Rendering Post Cards */}
-            {data.map((post, index) => (
-              <ProfilePostCard
-                key={index}
-                userImage={post.userImage}
-                username={post?.username}
-                userHandle={post.userHandle}
-                postText={post.postText}
-                postImage={post.postImage}
-                likes={post.likes}
-                comments={post.comments}
-                shares={post.shares}
-              />
-            ))}
+            {userPostsData?.getUserPosts ? (
+              userPostsData?.getUserPosts.map((post: any, index: any) => (
+                <ProfilePostCard
+                  key={index}
+                  id={post?.id}
+                  userImage={post?.userId?.profileImage}
+                  username={
+                    post?.userId?.firstName + post?.userId?.lastName
+                      ? post?.userId?.firstName + " " + post?.userId?.lastName
+                      : " No Name"
+                  }
+                  userHandle={post?.userId?.username}
+                  ownerId={post?.userId?.id}
+                  handle={post?.userId?.username || ""}
+                  postText={post?.title}
+                  postImage={post?.image}
+                  likes={post?.likes}
+                  stats={post?.stats}
+                  currentUserId={currentUser?.me?.id}
+                />
+              ))
+            ) : (
+              <View className="flex-1 justify-center items-center bg-white">
+                <Text>No posts yet</Text>
+              </View>
+            )}
           </ScrollView>
         )}
         {selectedTab === "Followers" && (
           <ScrollView className="flex-1 bg-gray-100 p-4">
-            {/* Rendering User Cards */}
-            {users.map((user, index) => (
-              <UserCard
-                key={index}
-                userImage={user.userImage}
-                username={user?.username}
-                userHandle={user.userHandle}
-                isFollowing={user.isFollowing}
-                onFollowToggle={() => {
-                  // Logic for follow/unfollow toggle
-                  console.log(`Toggled follow for ${user?.username}`);
-                }}
-              />
-            ))}
+            {userData?.getUser?.followers.length > 0 ? (
+              userFollowersData?.getUserFollowers?.map(
+                (user: any, index: any) => (
+                  <UserCard
+                    key={index}
+                    userId={user?.id}
+                    userImage={user?.userImage}
+                    username={
+                      user?.firstName + user?.lastName
+                        ? user?.firstName + " " + user?.lastName
+                        : "No Name"
+                    }
+                    userHandle={user?.username}
+                    isFollowing={user?.isFollowing}
+                    onFollowToggle={() => {
+                      console.log(`Toggled follow for ${user?.username}`);
+                    }}
+                  />
+                )
+              )
+            ) : (
+              <View className="flex-1 justify-center items-center bg-white">
+                <Text>No followers yet</Text>
+              </View>
+            )}
           </ScrollView>
         )}
         {selectedTab === "Following" && (
           <ScrollView className="flex-1 bg-gray-100 p-4">
-            {/* Rendering User Cards */}
-            {users.map((user, index) => (
-              <UserCard
-                key={index}
-                userImage={user.userImage}
-                username={user?.username}
-                userHandle={user.userHandle}
-                isFollowing={user.isFollowing}
-                onFollowToggle={() => {
-                  // Logic for follow/unfollow toggle
-                  console.log(`Toggled follow for ${user?.username}`);
-                }}
-              />
-            ))}
+            {userData?.getUser?.following.length > 0 ? (
+              userFollowingData?.getUserFollowing?.map(
+                (user: any, index: any) => (
+                  <UserCard
+                    key={index}
+                    userId={user?.id}
+                    userImage={user?.userImage}
+                    username={
+                      user?.firstName || user?.lastName
+                        ? " " + user?.lastName
+                        : "No Name"
+                    }
+                    userHandle={user?.username}
+                    isFollowing={user?.isFollowing}
+                    onFollowToggle={() => {
+                      console.log(`Toggled follow for ${user?.username}`);
+                    }}
+                  />
+                )
+              )
+            ) : (
+              <View className="flex-1 justify-center items-center bg-white">
+                <Text>No following yet</Text>
+              </View>
+            )}
           </ScrollView>
         )}
       </ScrollView>
