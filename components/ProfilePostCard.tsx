@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import PostLikeButton from "./PostLikeButton";
 
 const ProfilePostCard = ({
   userImage,
@@ -11,6 +12,7 @@ const ProfilePostCard = ({
   likes,
   comments,
   shares,
+  id,
 }: any) => {
   return (
     <View className="p-4 bg-white shadow-md my-2 rounded-lg">
@@ -36,19 +38,20 @@ const ProfilePostCard = ({
 
       {/* Post Actions */}
       <View className="flex-row justify-between items-center">
-        <TouchableOpacity className="flex-row items-center">
+        <PostLikeButton likes={likes} postId={id} />
+        {/* <TouchableOpacity className="flex-row items-center">
           <Ionicons name="heart-outline" size={18} color="black" />
-          <Text className="ml-1 text-xs">{likes}k</Text>
-        </TouchableOpacity>
+          <Text className="ml-1 text-xs">{likes}</Text>
+        </TouchableOpacity> */}
 
         <TouchableOpacity className="flex-row items-center">
           <Ionicons name="chatbubble-outline" size={18} color="black" />
-          <Text className="ml-1 text-xs">{comments}k </Text>
+          <Text className="ml-1 text-xs">{comments} </Text>
         </TouchableOpacity>
 
         <TouchableOpacity className="flex-row items-center">
           <Ionicons name="share-outline" size={18} color="black" />
-          <Text className="ml-1 text-xs">{shares}k</Text>
+          <Text className="ml-1 text-xs">{shares}</Text>
         </TouchableOpacity>
       </View>
     </View>
