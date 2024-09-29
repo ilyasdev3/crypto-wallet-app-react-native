@@ -19,7 +19,7 @@ const ProfilePhotoScreen = () => {
   const [message, setMessage] = useState("");
 
   const params = useLocalSearchParams();
-  const { username, password } = params;
+  const { username, password, firstName, lastName } = params;
 
   const [createUser, { loading }] = useMutation(CREATE_USER, {
     onCompleted: async (data) => {
@@ -85,6 +85,8 @@ const ProfilePhotoScreen = () => {
             username,
             password,
             profileImage: profileImage.base64,
+            firstName,
+            lastName,
           },
         },
       });

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useMutation } from "@apollo/client";
 import { CHECK_USERNAME } from "../../lib/graphql/user/user.mutations";
 
@@ -17,6 +17,10 @@ const UsernameScreen = () => {
 
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const { firstName, lastName } = useLocalSearchParams();
+
+  console.log("firstName", firstName);
+  console.log("lastName", lastName);
 
   const [checkUsername, { loading }] = useMutation(CHECK_USERNAME, {
     onCompleted: (data) => {
@@ -24,7 +28,9 @@ const UsernameScreen = () => {
       setMessage(data.checkUsername);
       if (data.checkUsername === "Username available") {
         console.log("Username is available, redirecting to Password screen");
-        return router.push(`/(auth)/Password?username=${username}`);
+        return router.push(
+          `/(auth)/Password?username=${username}&firstName=${firstName}&lastName=${lastName}`
+        );
       } else {
         console.log(
           "Username is not available, redirecting to Username screen"

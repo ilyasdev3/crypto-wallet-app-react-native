@@ -70,7 +70,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace("/(auth)/Username");
+      router.replace("/(auth)/UserNames");
     }
   }, [isLoading, isAuthenticated]);
 

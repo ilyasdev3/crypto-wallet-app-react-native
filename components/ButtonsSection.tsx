@@ -1,23 +1,35 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
+import { Ionicons } from "@expo/vector-icons"; // Assuming you're using Expo or have installed react-native-vector-icons
 
-const ButtonsSection = ({ onPress }: any) => {
+const ButtonsSection = ({ setModalVisible }: any) => {
   return (
-    <View className="flex-row mt-6 w-full px-4 gap-x-8">
-      <TouchableOpacity className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-        <Text className="text-green-600">Buy</Text>
+    <View className="flex-row justify-around mt-6 w-full px-4">
+      {/* Buy Button */}
+      <TouchableOpacity className="w-20 h-20 rounded-lg bg-green-500 flex items-center justify-center shadow-lg">
+        <Ionicons name="cart-outline" size={24} color="white" />
+        <Text className="text-white mt-2 font-bold">Buy</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-        <Text className="text-blue-600">Send</Text>
+      {/* Send Button */}
+      <TouchableOpacity
+        onPress={() => setModalVisible(true)}
+        className="w-20 h-20 rounded-lg bg-blue-500 flex items-center justify-center shadow-lg"
+      >
+        <Ionicons name="send-outline" size={24} color="white" />
+        <Text className="text-white mt-2 font-bold">Send</Text>
       </TouchableOpacity>
 
-      {/* <TouchableOpacity className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-        <Text className="text-yellow-600">Swap</Text>
-      </TouchableOpacity>
+      {/* Swap Button */}
+      {/* <TouchableOpacity className="w-20 h-20 rounded-lg bg-yellow-500 flex items-center justify-center shadow-lg">
+        <Ionicons name="swap-horizontal-outline" size={24} color="white" />
+        <Text className="text-white mt-2 font-bold">Swap</Text>
+      </TouchableOpacity> */}
 
-      <TouchableOpacity className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-        <Text className="text-red-600">More</Text>
+      {/* More Button */}
+      {/* <TouchableOpacity className="w-20 h-20 rounded-lg bg-red-500 flex items-center justify-center shadow-lg">
+        <Ionicons name="ellipsis-horizontal" size={24} color="white" />
+        <Text className="text-white mt-2 font-bold">More</Text>
       </TouchableOpacity> */}
     </View>
   );

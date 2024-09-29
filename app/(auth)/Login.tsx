@@ -105,7 +105,7 @@ const LoginPage = () => {
         <Text className="text-white text-lg font-bold">Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Username")}>
+      <TouchableOpacity onPress={() => navigation.navigate("UserNames")}>
         <Text className="text-center text-blue-500 text-lg">
           Don't have an account? Register
         </Text>

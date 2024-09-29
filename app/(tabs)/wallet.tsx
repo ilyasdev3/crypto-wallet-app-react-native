@@ -5,26 +5,50 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  Modal,
+  TextInput,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Avatar from "@/components/reuseable/Avatar";
 import WalletCard from "@/components/WalletCard";
-import TabCard from "@/components/TabCard";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { GET_WALLET } from "../../lib/graphql/wallet/wallet.queries";
-import QRCode from "react-native-qrcode-svg"; // For QR code generation
+import QRCode from "react-native-qrcode-svg";
 import ButtonsSection from "@/components/ButtonsSection";
+import { TRANSFER_FUNDS } from "@/lib/graphql/wallet/wallet.mutations";
 
 const Page = () => {
-  const { loading, error, data: walletData, refetch } = useQuery(GET_WALLET);
+  const {
+    loading,
+    error,
+    data: walletData,
+    refetch,
+  } = useQuery(GET_WALLET, {
+    fetchPolicy: "no-cache",
+  });
 
-  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const [transferFunds, { loading: transferLoading }] = useMutation(
+    TRANSFER_FUNDS,
+    {
+      onCompleted: (data) => {
+        console.log("Transfer successful:", data);
+        setTimeout(() => refetch(), 10000);
+        Alert.alert("Success", "Transfer successful.");
+      },
+      onError: (error) => {
+        console.error("Error transferring funds:", error);
+      },
+    }
+  );
 
   const data = walletData?.getWallet;
 
-  console.log("data", data);
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -36,48 +60,54 @@ const Page = () => {
     return (
       <View className="flex-1 justify-center items-center bg-white">
         <Text>Error loading data</Text>
-        <TouchableOpacity
-          onPress={() => {
-            console.log("reloading");
-            refetch();
-            ``;
-          }}
-        >
+        <TouchableOpacity onPress={() => refetch()}>
           <Text>Reload</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  // const renderDropdown = () => {
-  //   return (
-  //     <View className="absolute top-14 left-0 bg-white shadow-md rounded-lg p-4 z-10 ">
-  //       {/* show buttons for profile and logout */}
-  //       <View className="flex-col justify-between gap-4">
-  //         <TouchableOpacity>
-  //           <Text className="text-lg font-bold">Profile</Text>
-  //         </TouchableOpacity>
-  //         <TouchableOpacity>
-  //           <Text className="text-lg font-bold">Logout</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </View>
-  //   );
-  // };
+  const walletAddress = data?.address || "N/A";
 
-  // const toggleDropdown = () => {
-  //   setDropdownVisible(!dropdownVisible);
-  // };
+  const handleTransfer = () => {
+    if (!amount || !recipientAddress) {
+      console.log("Please enter an amount and recipient address");
+      Alert.alert("Error", "Please fill out all fields.");
+      return;
+    }
+    if (Number(amount) < 0) {
+      console.log("Amount must be greater than 0");
+      Alert.alert("Error", "Amount must be greater than 0.");
+      return;
+    }
+    if (Number(amount) > Number(data?.balance)) {
+      console.log("Insufficient balance");
+      Alert.alert("Error", "Insufficient balance.");
+      return;
+    }
+    if (recipientAddress.length !== 42) {
+      console.log("Invalid recipient address");
+      Alert.alert("Error", "Invalid recipient address.");
+      return;
+    }
 
-  const walletAddress = data?.address || "N/A"; // Assuming the wallet address is available in the data
+    transferFunds({
+      variables: {
+        transferFunds: {
+          amount,
+          address: recipientAddress,
+        },
+      },
+    });
+    setModalVisible(false);
+    setRecipientAddress("");
+    setAmount("");
+  };
 
   return (
     <SafeAreaView className="">
       <ScrollView className="h-screen w-screen bg-[#FFFFFF] p-4 flex flex-col gap-y-8">
         {/* Header Section */}
-
-        {/* Wallet Section */}
-
         <View className="flex-1">
           <Text className="text-3xl font-bold mb-4">My Wallet</Text>
 
@@ -89,10 +119,7 @@ const Page = () => {
             <Text className="text-lg font-bold">Wallet Address</Text>
             <Text className="text-xs text-gray-500 my-2">{walletAddress}</Text>
             <TouchableOpacity
-              onPress={() => {
-                // Logic to copy wallet address
-                console.log("Address copied:", walletAddress);
-              }}
+              onPress={() => console.log("Address copied:", walletAddress)}
               className="bg-green-500 p-2 rounded-md"
             >
               <Text className="text-white text-center">Copy Address</Text>
@@ -107,12 +134,90 @@ const Page = () => {
             </Text>
           </View>
         </View>
-        <ButtonsSection />
+        <ButtonsSection setModalVisible={setModalVisible} />
       </ScrollView>
+
+      {/* Transfer Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalView}>
+            <Text className="text-xl font-bold mb-4">Transfer Funds</Text>
+            <TextInput
+              placeholder="Recipient Address"
+              value={recipientAddress}
+              onChangeText={setRecipientAddress}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Amount"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={handleTransfer}
+                className="bg-green-500 p-2 rounded-md"
+              >
+                <Text className="text-white text-center">Confirm Transfer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                className="bg-red-500 p-2 rounded-md"
+              >
+                <Text className="text-white text-center">Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
-export default Page;
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark background for the modal
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "80%", // Set the width of the modal
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    width: "100%",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+});
 
-const styles = StyleSheet.create({});
+export default Page;

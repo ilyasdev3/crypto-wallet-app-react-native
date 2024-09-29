@@ -6,7 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 const PasswordScreen = () => {
   const [password, setPassword] = useState("");
   const [eyeIcon, setEyeIcon] = useState("eye-off");
-  const { username } = useLocalSearchParams();
+  const { username, firstName, lastName } = useLocalSearchParams();
 
   const validatePassword = (pass: string) => {
     const regex =
@@ -18,7 +18,7 @@ const PasswordScreen = () => {
     if (validatePassword(password)) {
       router.push({
         pathname: "/(auth)/ProfilePhoto",
-        params: { username, password },
+        params: { username, password, firstName, lastName },
       });
     } else {
       Alert.alert(
